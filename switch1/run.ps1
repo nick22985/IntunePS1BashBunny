@@ -1,13 +1,13 @@
 ﻿$VolumeName = "bashbunny"
 $computerSystem = Get-CimInstance CIM_ComputerSystem
 $backupDrive = $null
-$BaseScriptLocation = $backupDrive + "/payloads/"
 
 get-wmiobject win32_logicaldisk | % {
     if ($_.VolumeName -eq $VolumeName) {
         $backupDrive = $_.DeviceID
     }
 }
+$BaseScriptLocation = $backupDrive + "/payloads/"
 
 $envVars = Import-Csv -Path "$BaseScriptLocation/.env" -Delimiter ","
 $localEnvVars = @{}
