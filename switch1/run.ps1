@@ -34,9 +34,9 @@ if ($release -gt $currentVersion) {
     $doUpdate = Read-Host -Prompt "Update available. Would you like to update to version: $release? (y/n)"
         if($doUpdate -eq "y") {
         # Download the new files
-        Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "update.zip"
+        Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "$BaseScriptLocation/update.zip"
         # Unzip the downloaded file
-        Expand-Archive -Path "./update.zip" -DestinationPath "$backupDrive/payloads/update"
+        Expand-Archive -Path "$BaseScriptLocation/update.zip" -DestinationPath "$BaseScriptLocation/update"
 
         #Move new update to switch positions
         Move-Item -Path "../update\$repo-$release\switch2\*" -Destination $BaseScriptLocation\switch2 -Force
@@ -44,7 +44,7 @@ if ($release -gt $currentVersion) {
 
         # Delete update file
         Remove-Item -Recurse -Force $BaseScriptLocation\update
-        Remove-Item -Recurse -Force $BaseScriptLocation/update.zip
+        Remove-Item -Recurse -Force $BaseScriptLocation\update.zip
 
         # Set .env currentVersion
         $localEnvVars.currentVersion = $release
