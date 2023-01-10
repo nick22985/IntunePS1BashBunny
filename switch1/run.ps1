@@ -7,48 +7,6 @@ get-wmiobject win32_logicaldisk | % {
     }
 }
 
-
-# Define the repository owner and name
-$owner = "nick22985"
-$repo = "IntunePS1BashBunny"
-
-# Define the current version of the script
-$currentVersion = "0"
-
-# Get the latest release from GitHub
-$release = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest").tag_name
-Write-Host $release
-Write-Host $backupDrive
-# Compare the latest release with the current version
-if ($release -gt $currentVersion) {
-    # Download the new files
-    Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "update.zip"
-    # Unzip the downloaded file
-    Expand-Archive -Path "update.zip" -DestinationPath "../update"
-
-    # Copy env file to update
-    Copy-Item -Path "../.env" -Destination "../update/$repo-$release/.env" -Force
-
-    # Define the location of the old script
-    $oldScriptLocation = $backupDrive + "/payloads/"
-	Write-Host $oldScriptLocation
-
-    Move-Item -Path "../update\$repo-$release\switch2\*" -Destination $oldScriptLocation\switch2 -Force
-    Move-Item -Path "../update\$repo-$release\switch1\*" -Destination $oldScriptLocation\switch1 -Force
-
-    # Delete update file
-    Remove-Item -Recurse -Force $oldScriptLocation\update
-
-    # Run the update script
-    #& "$oldScriptLocation\update.ps1"
-
-} else {
-    # No update available
-    Write-Host "No update available."
-}
-
-
-
 $envVars = Import-Csv -Path "../.env" -Delimiter ","
 $localEnvVars = @{}
 foreach ($envVar in $envVars) {
@@ -57,13 +15,60 @@ foreach ($envVar in $envVars) {
     }
 }
 
+# Define the repository owner and name
+$owner = "nick22985"
+$repo = "IntunePS1BashBunny"
+
+# Define the current version of the script
+$currentVersion = $localEnvVars.currentVersion
+
+# Get the latest release from GitHub
+$release = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest").tag_name
+Write-Host $release
+Write-Host $backupDrive
+# Compare the latest release with the current version
+if ($release -gt $currentVersion) {
+    # Update available
+    $doUpdate = Read-Host -Prompt "Update available. Would you like to update to version: $release? (y/n)"
+        if($doUpdate -eq "y") {
+        # Download the new files
+        Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "update.zip"
+        # Unzip the downloaded file
+        Expand-Archive -Path "./update.zip" -DestinationPath "../update"
+        # Define the location of the old script
+        $oldScriptLocation = $backupDrive + "/payloads/"
+        Write-Host $oldScriptLocation
+
+        Move-Item -Path "../update\$repo-$release\switch2\*" -Destination $oldScriptLocation\switch2 -Force
+        Move-Item -Path "../update\$repo-$release\switch1\*" -Destination $oldScriptLocation\switch1 -Force
+
+        # Delete update file
+        Remove-Item -Recurse -Force $oldScriptLocation\update
+        Remove-Item -Recurse -Force ./update.zip
+
+        # Set .env currentVersion
+        $localEnvVars.currentVersion = $release
+        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "../.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
+
+        # Run the update script
+        & "./run.ps1"
+        Exit
+    } else {
+        Write-host "Opted to not update to new version. Running script"
+    }
+} else {
+    # No update available
+    Write-Host "No update available."
+}
+
+
 # Validate if variablels exists in env.
 if($localEnvVars.domain -eq $null) {
     $domain = Read-Host -Prompt "Missing domain in .env file. Would you like to fix this by setting a domain in .env.(y/n)"
     if($domain -eq "y") {
         $domain = Read-Host -Prompt "Enter domain with @ in front. Example: @domain.com"
         $localEnvVars.domain = $domain
-        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path ".env" -NoTypeInformation -Delimiter "," -Encoding UTF8
+        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "../.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
     } else {
         Write-Host "No domain terminating...."
         Exit
@@ -75,7 +80,7 @@ if($localEnvVars.GroupTag -eq $null) {
     if($GroupTag -eq "y") {
         $GroupTag = Read-Host -Prompt "Enter GroupTag"
         $localEnvVars.GroupTag = $GroupTag
-        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path ".env" -NoTypeInformation -Delimiter "," -Encoding UTF8
+        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "../.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
     } else {
         Write-Host "No GroupTag terminating...."
         Exit
@@ -87,7 +92,7 @@ if($localEnvVars.Group -eq $null) {
     if($Group -eq "y") {
         $Group = Read-Host -Prompt "Enter Group"
         $localEnvVars.Group = $Group
-        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path ".env" -NoTypeInformation -Delimiter "," -Encoding UTF8
+        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "../.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
     } else {
         Write-Host "No Group terminating...."
         Exit
@@ -121,8 +126,8 @@ cd $TARGETDIR
 
 $email = $UserAccount + $localEnvVars.domain
 
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
-Install-Script -Name Get-WindowsAutopilotInfo -Force -Confirm:$False
-$env:Path += ";C:\Program Files\WindowsPowerShell\Scripts"
-
-Get-WindowsAutopilotInfo.ps1 -Online -GroupTag $localEnvVars.GroupTag -AddToGroup $localEnvVars.Group -Assigneduser $UserAccount -OutputFile $backupPath\AutopilotHWID-$UserAccount-$datetime.csv
+#Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
+#Install-Script -Name Get-WindowsAutopilotInfo -Force -Confirm:$False
+#$env:Path += ";C:\Program Files\WindowsPowerShell\Scripts"
+#
+#Get-WindowsAutopilotInfo.ps1 -Online -GroupTag $localEnvVars.GroupTag -AddToGroup $localEnvVars.Group -Assigneduser $UserAccount -OutputFile $backupPath\AutopilotHWID-$UserAccount-$datetime.csv
