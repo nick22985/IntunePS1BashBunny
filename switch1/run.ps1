@@ -24,6 +24,7 @@ $currentVersion = $localEnvVars.currentVersion
 
 # Get the latest release from GitHub
 $release = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest").tag_name
+$BaseScriptLocation = $backupDrive + "/payloads/"
 Write-Host $release
 Write-Host $backupDrive
 # Compare the latest release with the current version
@@ -34,21 +35,19 @@ if ($release -gt $currentVersion) {
         # Download the new files
         Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "update.zip"
         # Unzip the downloaded file
-        Expand-Archive -Path "./update.zip" -DestinationPath "../update"
-        # Define the location of the old script
-        $oldScriptLocation = $backupDrive + "/payloads/"
-        Write-Host $oldScriptLocation
+        Expand-Archive -Path "./update.zip" -DestinationPath "$backupDrive/payloads/update"
 
-        Move-Item -Path "../update\$repo-$release\switch2\*" -Destination $oldScriptLocation\switch2 -Force
-        Move-Item -Path "../update\$repo-$release\switch1\*" -Destination $oldScriptLocation\switch1 -Force
+        #Move new update to switch positions
+        Move-Item -Path "../update\$repo-$release\switch2\*" -Destination $BaseScriptLocation\switch2 -Force
+        Move-Item -Path "../update\$repo-$release\switch1\*" -Destination $BaseScriptLocation\switch1 -Force
 
         # Delete update file
-        Remove-Item -Recurse -Force $oldScriptLocation\update
-        Remove-Item -Recurse -Force ./update.zip
+        Remove-Item -Recurse -Force $BaseScriptLocation\update
+        Remove-Item -Recurse -Force $BaseScriptLocation/update.zip
 
         # Set .env currentVersion
         $localEnvVars.currentVersion = $release
-        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "../.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
+        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "$BaseScriptLocation/.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
 
         # Run the update script
         & "./run.ps1"
@@ -68,7 +67,7 @@ if($localEnvVars.domain -eq $null) {
     if($domain -eq "y") {
         $domain = Read-Host -Prompt "Enter domain with @ in front. Example: @domain.com"
         $localEnvVars.domain = $domain
-        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "../.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
+        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "$BaseScriptLocation/.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
     } else {
         Write-Host "No domain terminating...."
         Exit
@@ -80,7 +79,7 @@ if($localEnvVars.GroupTag -eq $null) {
     if($GroupTag -eq "y") {
         $GroupTag = Read-Host -Prompt "Enter GroupTag"
         $localEnvVars.GroupTag = $GroupTag
-        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "../.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
+        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "$BaseScriptLocation/.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
     } else {
         Write-Host "No GroupTag terminating...."
         Exit
@@ -92,7 +91,7 @@ if($localEnvVars.Group -eq $null) {
     if($Group -eq "y") {
         $Group = Read-Host -Prompt "Enter Group"
         $localEnvVars.Group = $Group
-        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "../.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
+        $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "$BaseScriptLocation/.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
     } else {
         Write-Host "No Group terminating...."
         Exit
