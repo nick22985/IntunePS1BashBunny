@@ -154,4 +154,4 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
 Install-Script -Name Get-WindowsAutopilotInfo -Force -Confirm:$False
 $env:Path += ";C:\Program Files\WindowsPowerShell\Scripts"
 
-Get-WindowsAutopilotInfo.ps1 -Online -GroupTag $localEnvVars.GroupTag -AddToGroup $localEnvVars.Group -Assigneduser $UserAccount -OutputFile $backupPath\AutopilotHWID-$UserAccount-$datetime.csv
+Get-WindowsAutopilotInfo.ps1 -Online -GroupTag $localEnvVars.GroupTag -AddToGroup $localEnvVars.Group -Assigneduser $email -OutputFile $backupPath\AutopilotHWID-$UserAccount-$datetime.csv
