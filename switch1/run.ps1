@@ -1,13 +1,15 @@
 ﻿$VolumeName = "bashbunny"
 $computerSystem = Get-CimInstance CIM_ComputerSystem
 $backupDrive = $null
+$BaseScriptLocation = $backupDrive + "/payloads/"
+
 get-wmiobject win32_logicaldisk | % {
     if ($_.VolumeName -eq $VolumeName) {
         $backupDrive = $_.DeviceID
     }
 }
 
-$envVars = Import-Csv -Path "../.env" -Delimiter ","
+$envVars = Import-Csv -Path "$BaseScriptLocation/.env" -Delimiter ","
 $localEnvVars = @{}
 foreach ($envVar in $envVars) {
     if ($envVar.Value -ne $null -and $envVar.Value -ne "" -and $envVar.Name -ne $null -and $envVar.Name -ne "") {
@@ -24,7 +26,6 @@ $currentVersion = $localEnvVars.currentVersion
 
 # Get the latest release from GitHub
 $release = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest").tag_name
-$BaseScriptLocation = $backupDrive + "/payloads/"
 Write-Host $release
 Write-Host $backupDrive
 # Compare the latest release with the current version
