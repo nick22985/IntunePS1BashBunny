@@ -39,8 +39,8 @@ if ($release -gt $currentVersion) {
         Expand-Archive -Path "$BaseScriptLocation/update.zip" -DestinationPath "$BaseScriptLocation/update"
 
         #Move new update to switch positions
-        Move-Item -Path "../update\$repo-$release\switch2\*" -Destination $BaseScriptLocation\switch2 -Force
-        Move-Item -Path "../update\$repo-$release\switch1\*" -Destination $BaseScriptLocation\switch1 -Force
+        Move-Item -Path "$BaseScriptLocation\update\$repo-$release\switch2\*" -Destination $BaseScriptLocation\switch2 -Force
+        Move-Item -Path "$BaseScriptLocation\update\$repo-$release\switch1\*" -Destination $BaseScriptLocation\switch1 -Force
 
         # Delete update file
         Remove-Item -Recurse -Force $BaseScriptLocation\update
@@ -51,7 +51,7 @@ if ($release -gt $currentVersion) {
         $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "$BaseScriptLocation/.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
 
         # Run the update script
-        & "./run.ps1"
+        & "$BaseScriptLocation/switch1/run.ps1"
         Exit
     } else {
         Write-host "Opted to not update to new version. Running script"
