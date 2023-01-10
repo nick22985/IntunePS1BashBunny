@@ -24,22 +24,23 @@ if ($release -gt $currentVersion) {
     # Download the new files
     Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "update.zip"
     # Unzip the downloaded file
-    Expand-Archive -Path "update.zip" -DestinationPath "update"
+    Expand-Archive -Path "update.zip" -DestinationPath "../update"
 
     # Copy env file to update
-    Copy-Item -Path "../.env" -Destination "update/$repo-$release/.env" -Force
+    Copy-Item -Path "../.env" -Destination "../update/$repo-$release/.env" -Force
 
     # Define the location of the old script
     $oldScriptLocation = $backupDrive + "/payloads/"
+	Write-Host $oldScriptLocation
 
-    # Move the new files to the location of the old script, overwriting existing files
-    Move-Item -Path "update\*" -Destination $oldScriptLocation -Force
+    Move-Item -Path "../update\$repo-$release\switch2\*" -Destination $oldScriptLocation\switch2 -Force
+    Move-Item -Path "../update\$repo-$release\switch1\*" -Destination $oldScriptLocation\switch1 -Force
 
-    # Delete the old files
+    # Delete update file
     Remove-Item -Recurse -Force $oldScriptLocation\update
 
     # Run the update script
-    & "$oldScriptLocation\update.ps1"
+    #& "$oldScriptLocation\update.ps1"
 
 } else {
     # No update available
