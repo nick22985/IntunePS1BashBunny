@@ -2,6 +2,35 @@
 $computerSystem = Get-CimInstance CIM_ComputerSystem
 $backupDrive = $null
 
+$art = "
+  / _ \_________________________/`/\+-/\'\'\
+\_\(_)/_/ Intune Auto Upploader -+-    -+-+-
+ _//o\\_                        \'\/+-\/`/`/
+  /   \   By Nick22985           \/-+--\/`/
+"
+
+Write-Host $art
+function waitUserInput($defaultValue = "Default Value", $timeout = 5, $defaultText = "Please enter a value:") {
+
+    [Console]::Write($defaultText)
+
+    $response = $null
+    $timestamp = [Environment]::TickCount
+
+    while(([Environment]::TickCount - $timestamp) -lt ($timeout * 1000)) {
+        if([Console]::KeyAvailable) {
+            $response = [Console]::ReadLine()
+            break
+        }
+    }
+
+    if($response -eq $null) {
+        $response = $defaultValue
+    }
+    Write-Host
+    return $response
+}
+
 get-wmiobject win32_logicaldisk | % {
     if ($_.VolumeName -eq $VolumeName) {
         $backupDrive = $_.DeviceID
@@ -23,15 +52,12 @@ $repo = "IntunePS1BashBunny"
 
 # Define the current version of the script
 $currentVersion = $localEnvVars.currentVersion
-
 # Get the latest release from GitHub
 $release = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest").tag_name
-Write-Host $release
-Write-Host $backupDrive
 # Compare the latest release with the current version
 if ($release -gt $currentVersion) {
     # Update available
-    $doUpdate = Read-Host -Prompt "Update available. Would you like to update to version: $release? (y/n)"
+    $doUpdate = waitUserInput -defaultValue "n" -timeout 5 -defaultText "Update available. Would you like to update to version $release ? (y/n): "
         if($doUpdate -eq "y") {
         # Download the new files
         Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "$BaseScriptLocation/update.zip"
@@ -50,6 +76,7 @@ if ($release -gt $currentVersion) {
         $localEnvVars.currentVersion = $release
         $localEnvVars.GetEnumerator() | Select-Object @{n="Name";e={$_.Key}},@{n="Value";e={$_.Value}} | Export-Csv -Path "$BaseScriptLocation/.env" -NoTypeInformation -Delimiter "," -Encoding UTF8
 
+        Write-Host "Restarting Script with version $release"
         # Run the update script
         & "$BaseScriptLocation/switch1/run.ps1"
         Exit
@@ -60,7 +87,6 @@ if ($release -gt $currentVersion) {
     # No update available
     Write-Host "No update available."
 }
-
 
 # Validate if variablels exists in env.
 if($localEnvVars.domain -eq $null) {
@@ -99,9 +125,7 @@ if($localEnvVars.Group -eq $null) {
     }
 }
 
-
 $UserAccount = Read-host -Prompt "User Account"
-
 
 #See if a loot folder exist in usb. If not create one
 $TARGETDIR = $backupDrive + "\loot"
