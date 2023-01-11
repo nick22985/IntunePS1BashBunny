@@ -62,7 +62,7 @@ Write-Host "Current Version: $currentVersion | Latest Version: $release"
 if ($release -eq $currentVersion) {
     # Update available
 	$default = "Update available. Would you like to update to version $release by $author ? (y/n): "
-    $doUpdate = waitUserInput -defaultValue "n" -timeout 5 -defaultText
+    $doUpdate = waitUserInput -defaultValue "n" -timeout 5 -defaultText $default
         if($doUpdate -eq "y") {
         # Download the new files
         Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "$BaseScriptLocation/update.zip"
