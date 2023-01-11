@@ -57,8 +57,9 @@ $gitRelease = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo
 Read-Host $gitRelease.author.login
 $release = $gitRelease.tag_name
 $author = $gitRelease.author.login
+Write-Host "Current Version: $currentVersion | Latest Version: $release"
 # Compare the latest release with the current version
-if ($release -gt $currentVersion) {
+if ($release -eq $currentVersion) {
     # Update available
 	$default = "Update available. Would you like to update to version $release by $author ? (y/n): "
     $doUpdate = waitUserInput -defaultValue "n" -timeout 5 -defaultText
