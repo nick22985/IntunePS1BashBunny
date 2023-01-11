@@ -54,7 +54,7 @@ $repo = "IntunePS1BashBunny"
 $currentVersion = $localEnvVars.currentVersion
 # Get the latest release from GitHub
 $gitRelease = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest")
-Read-Host $gitRelease.author.login
+
 $release = $gitRelease.tag_name
 $author = $gitRelease.author.login
 Write-Host "Current Version: $currentVersion | Latest Version: $release"
