@@ -53,11 +53,15 @@ $repo = "IntunePS1BashBunny"
 # Define the current version of the script
 $currentVersion = $localEnvVars.currentVersion
 # Get the latest release from GitHub
-$release = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest").tag_name
+$gitRelease = (Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest")
+Read-Host $gitRelease.author.login
+$release = $gitRelease.tag_name
+$author = $gitRelease.author.login
 # Compare the latest release with the current version
 if ($release -gt $currentVersion) {
     # Update available
-    $doUpdate = waitUserInput -defaultValue "n" -timeout 5 -defaultText "Update available. Would you like to update to version $release ? (y/n): "
+	$default = "Update available. Would you like to update to version $release by $author ? (y/n): "
+    $doUpdate = waitUserInput -defaultValue "n" -timeout 5 -defaultText
         if($doUpdate -eq "y") {
         # Download the new files
         Invoke-WebRequest -Uri "https://github.com/$owner/$repo/archive/refs/tags/$release.zip" -OutFile "$BaseScriptLocation/update.zip"
