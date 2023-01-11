@@ -59,7 +59,7 @@ $release = $gitRelease.tag_name
 $author = $gitRelease.author.login
 Write-Host "Current Version: $currentVersion | Latest Version: $release"
 # Compare the latest release with the current version
-if ($release -eq $currentVersion) {
+if ($release -gt $currentVersion) {
     # Update available
 	$default = "Update available. Would you like to update to version $release by $author ? (y/n): "
     $doUpdate = waitUserInput -defaultValue "n" -timeout 5 -defaultText $default
