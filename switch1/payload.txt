@@ -4,6 +4,7 @@ LED SETUP
 ATTACKMODE HID STORAGE
 GET SWITCH_POSITION
 Q STRING "powershell.exe Set-WinUserLanguageList -LanguageList en-US -force"
+Q ENTER
 # Stage 1 - Powershell
 LED ATTACK
 Q SHIFT F10
